@@ -18,7 +18,7 @@
 HungarianAlgorithm::HungarianAlgorithm(){}
 HungarianAlgorithm::~HungarianAlgorithm(){}
 
-
+//
 //********************************************************//
 // A single function wrapper for solving assignment problem.
 //********************************************************//
