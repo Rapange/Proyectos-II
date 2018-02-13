@@ -8,7 +8,7 @@
 // Both this code and the orignal code are published under the BSD license.
 // by Cong Ma, 2016
 //
-
+//
 #ifndef HUNGARIAN_H
 #define HUNGARIAN_H
 

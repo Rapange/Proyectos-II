@@ -11,14 +11,15 @@
 //
 #include <stdlib.h>
 #include <cfloat> // for DBL_MAX
+#include <limits> // for numeric_limits<decltype(variable)>::max
 #include <cmath>  // for fabs()
-#include "Hungarian.hpp"
+#include "hungarian.hpp"
 
 
 HungarianAlgorithm::HungarianAlgorithm(){}
 HungarianAlgorithm::~HungarianAlgorithm(){}
 
-//
+
 //********************************************************//
 // A single function wrapper for solving assignment problem.
 //********************************************************//
@@ -119,7 +120,7 @@ void HungarianAlgorithm::assignmentoptimal(int *assignment, ll *cost, ll *distMa
 		/* Steps 1 and 2a */
 		for (row = 0; row<nOfRows; row++)
 			for (col = 0; col<nOfColumns; col++)
-				if (fabs(distMatrix[row + nOfRows*col]) < DBL_EPSILON)
+				if (fabs(distMatrix[row + nOfRows*col]) < numeric_limits<double>::epsilon())
 					if (!coveredColumns[col])
 					{
 						starMatrix[row + nOfRows*col] = true;
@@ -367,7 +368,7 @@ void HungarianAlgorithm::step5(int *assignment, ll *distMatrix, bool *starMatrix
 	int row, col;
 
 	/* find smallest uncovered element h */
-	h = DBL_MAX;
+	h = numeric_limits<decltype(h)>::max();
 	for (row = 0; row<nOfRows; row++)
 		if (!coveredRows[row])
 			for (col = 0; col<nOfColumns; col++)

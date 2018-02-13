@@ -10,8 +10,10 @@
 #include <iomanip>
 #include <cassert>
 #include <algorithm>
+#include <numeric>
+#include <limits>
 #include "hungarian.hpp"
-
+//
 using namespace std;
 typedef unsigned int ll;
 
@@ -26,11 +28,10 @@ vector < int > schedule; schedule [C*25 + tslot] = req_pos
 vector < bool > unavbl; unavbl [T*25 + tslot]
  unavbl [ x ]==1 means teacher cannot teach at that time*/
 
-
 unsigned int nclss, ntchs, ndys, nprds, ndps;
 vector<unsigned int> teacher_timeslots, assignments, teacher_wd, double_lessons;
 
-struct req{ short int lsns, mxpd, dbls;};
+struct req{ unsigned short int lsns, mxpd, dbls;};
 vector<req> reqs;
 vector<bool> unavbls;
 
@@ -152,15 +153,11 @@ struct Solution{
         midole = idti = teco = 0;
     }
 
-    UpdateSize()
+    void UpdateSize()
     {
         schd.assign(nclss*ndps, reqs.end());
     }
 };
-
-
-
-
 
 void fillTeachers(Solution & sol)
 {
@@ -176,7 +173,7 @@ void fillTeachers(Solution & sol)
                 //cout<<"teacher id en pos: "<<i<<" "<<j<<" ";
                 //teacher_idx = solution->m_schedule[i][j]->m_teacher;
                 //cout<<teacher_idx<<endl;
-                teacher_timeslots [ ( ( *rq - reqs.begin() ) % ntchs ) * ndps + j]++;
+                teacher_timeslots [ ( unsigned ( *rq - reqs.begin() ) % ntchs ) * ndps + j]++;
             }
             ++rq;
         }
@@ -194,7 +191,7 @@ void fillAssignments( Solution &sol )
             //cout<<j<<endl;
             if ( *rq < reqs.end() ) // req exists?
             {
-                assignments [ ( *rq - reqs.begin() ) * ndys + j / nprds]++;
+                assignments [ unsigned ( *rq - reqs.begin() ) * ndys + j / nprds]++;
             }
             ++rq;
         }
@@ -211,7 +208,7 @@ void fillTeacherWD(Solution &sol)
             //cout<<j<<endl;
             if ( *rq < reqs.end() ) // req exists?
             {
-                teacher_wd [ ( ( *rq - reqs.begin() ) % ntchs ) * ndys + j / nprds] = 1;
+                teacher_wd [ ( unsigned ( *rq - reqs.begin() ) % ntchs ) * ndys + j / nprds] = 1;
             }
             ++rq;
         }
@@ -230,7 +227,7 @@ void fillDoubleLessons( Solution &sol )
             for(unsigned int j = nprds - 1; j; --j)
             {
                 if ( *rq == lrq )
-                    double_lessons [ ( lrq - reqs.begin() ) ] ++;
+                    double_lessons [ unsigned ( lrq - reqs.begin() ) ] ++;
                 lrq = *(rq++);
             }
         }
@@ -261,7 +258,7 @@ unsigned int availabilities(Solution &sol)
         for(unsigned int j = 0; j < ndps; j++)
         {
             if ( *rq < reqs.end() ) // req exists?
-                if ( unavbls [ ( ( *rq - reqs.begin() ) % ntchs ) * ndps + j ] )
+                if ( unavbls [ ( unsigned ( *rq - reqs.begin() ) % ntchs ) * ndps + j ] )
                     ++sum;
             ++rq;
         }
@@ -310,8 +307,9 @@ unsigned int countIdleTimes(Solution &sol)
             short int p = 0;
             for(unsigned int j = nprds; j; --j)
             {
-                p<<1;
+                p<<=1;
                 if ( *it ) ++p;
+                ++it;
             }
             sum += tbl [p];
         }
@@ -319,7 +317,7 @@ unsigned int countIdleTimes(Solution &sol)
     return sum;
 }
 
-int getHardConstraints(Solution &sol)
+unsigned int getHardConstraints(Solution &sol)
 {
     //cout<<"hard constraints"<<endl;
     unsigned int mld = maxLessonsDay(sol);
@@ -337,7 +335,7 @@ int getHardConstraints(Solution &sol)
 
 }
 
-int getSoftConstraints(Solution &sol)
+unsigned int getSoftConstraints(Solution &sol)
 {
     //cout<<"soft constraints: "<<endl;
     unsigned int tc = teacherCompactness(sol);
@@ -364,7 +362,7 @@ void fitness(Solution &sol)
 
 void generateSolution(Solution & sol)
 {
-    vector<short int> avaiDp;
+    vector<unsigned short int> avaiDp;
     int lectures = 0, cl = -1, last_cl = cl, total_lec = 0;
     int random_ts;
     //cout<<num_q<<" "<<num_ts<<endl;
@@ -1118,14 +1116,14 @@ int main()
                         "NE-CESVP-2011-M-D","NE-CESVP-2011-V-A",
                         "NE-CESVP-2011-V-B","NE-CESVP-2011-V-C"};
 
-    srand(time(NULL));
+    //srand(time(NULL));
     string path;
     unsigned int seconds = 60 * 10; //10 min
     ofstream file("results_MT_4.txt", fstream::app);
 
 
     Solution sol, bsol;
-    int res, bres = 99999999999999;
+    int res, bres = numeric_limits<decltype(bres)>::max();
 
     cout<<"entra"<<endl;
     for(unsigned int i = 0; i < 34; i++)
@@ -1145,7 +1143,7 @@ int main()
             cout<< d <<" ";
         }
 
-        cout << sol.total << endl;
+        cout << endl << "score: " << sol.total << endl;
         /*if ( res < bres)
         {
             bres = res;
