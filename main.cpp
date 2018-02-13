@@ -62,6 +62,24 @@ struct Solution{
   }
 };
 
+void printSolution(Solution & sol)
+{
+	for(unsigned int j = 0 ; j < ndps; j++){
+		cout << setw(4) << j  <<" ";
+	}
+	cout << endl;
+	for(auto s = sol.schd.begin(); s != sol.schd.end();)
+	{
+		for(unsigned int j = 0; j < ndps; j++){
+			int d = -1;
+			if(*s < reqs.end() ) d = (*s - reqs.begin()) % ntchs;
+			cout << setw(4) << d << " ";
+			s++;
+		}
+		cout << endl;
+	}
+}
+
 
 bool isNum(char a)
 {
@@ -173,8 +191,11 @@ void readXML(string filename)
 
 void fillTeachers(Solution & sol)
 {
-  fill(teacher_timeslots.begin(), teacher_timeslots.end() , 0);
-  fill(teacher_wd.begin(), teacher_wd.end() , 0);
+  teacher_wd.assign(teacher_wd.capacity() , 0);
+  teacher_timeslots.assign(teacher_timeslots.capacity(), 0);
+  //fill(teacher_wd.begin(), teacher_wd.end() , 0);
+  //fill(teacher_timeslots.begin(), teacher_timeslots.end() , 0);
+  
   for( auto rq = sol.schd.begin(); rq<sol.schd.end(); )
   {
     for(unsigned int j = 0; j < ndps; j++)
@@ -196,7 +217,8 @@ void fillTeachers(Solution & sol)
 
 void fillAssignments( Solution &sol )
 {
-  fill(assignments.begin(), assignments.end() , 0);
+  assignments.assign(assignments.capacity(), 0);
+  //fill(assignments.begin(), assignments.end() , 0);
 
   for( auto rq = sol.schd.begin(); rq<sol.schd.end(); )
   {
@@ -214,7 +236,9 @@ void fillAssignments( Solution &sol )
 
 void fillDoubleLessons( Solution &sol )
 {
-  fill(double_lessons.begin(), double_lessons.end() , 0);
+  double_lessons.assign(double_lessons.capacity(), 0);
+  //fill(double_lessons.begin(), double_lessons.end() , 0);
+  
   auto cdl = double_lessons.begin();
   for( auto rq = sol.schd.begin(); rq<sol.schd.end(); )
   {
@@ -255,8 +279,8 @@ unsigned int availabilities(Solution &sol)
     for(unsigned int j = 0; j < ndps; j++)
     {
       if ( *rq < reqs.end() ) // req exists?
-      if ( unavbls [ ( unsigned ( *rq - reqs.begin() ) % ntchs ) * ndps + j ] )
-      ++sum;
+		if ( unavbls [ ( unsigned ( *rq - reqs.begin() ) % ntchs ) * ndps + j ] )
+			++sum;
       ++rq;
     }
   }
@@ -353,6 +377,7 @@ unsigned int getSoftConstraints(Solution &sol)
 void fitness(Solution &sol)
 {
   sol.hcs = getHardConstraints(sol);
+  
   sol.scs = getSoftConstraints(sol);
   sol.total = sol.hcs + sol.scs;
 }
@@ -497,7 +522,8 @@ void iteratedLocalSearchTQ(Solution & bsol, int stop_condition)
   stop_condition*=1000; // to milliseconds for precision
   elapsed(true);
   generateSolution(bsol);
-  fitness(bsol);
+  //fitness(bsol);
+  
   localSearchTQ(bsol);
   Solution csol = bsol;
   cout<<endl<< ">> " <<bsol.total<<endl;
@@ -692,30 +718,7 @@ string toString(unsigned int a)
 }
 
 
-void printSolution(sol_format &solution)
-{
-  cout<< setw(3)<<left<<"";
-  for(unsigned int i = 0; i < solution.m_num_ts; i++)
-  {
-    cout<<setw(4)<<left<<i;
-  }
-  cout<<endl;
-  for(unsigned int i = 0; i < solution.m_num_q; i++)
-  {
-    cout<< setw(2) << left;
-    cout<<i<<" ";
-    for(unsigned int j = 0; j < solution.m_num_ts; j++)
-    {
-      cout<<setw(4)<<left;
-      if(solution.m_schedule[i][j] != NULL)
-      cout<<toString(solution.m_schedule[i][j]->m_teacher);
-      else
-      cout<<"X";
-      cout<<"";
-    }
-    cout<<endl;
-  }
-}
+
 
 void convertMatrix(vector<int>& row, vector<vector<ll> > &real_matrix, unsigned int n, unsigned int m)
 {
@@ -1069,7 +1072,7 @@ int main()
   ofstream file("results_MT_4.txt", fstream::app);
 
 
-  for(unsigned int i = 0; i < 34; i++)
+  for(unsigned int i = 0; i < 1; i++)
   {
     High_school high_school;
     path = "instances/" + names[i] + ".xml";
@@ -1111,6 +1114,7 @@ int main()
   return 0;
 }
 
+//
 #endif
 
 int main()
@@ -1145,7 +1149,7 @@ int main()
   "NE-CESVP-2011-M-D","NE-CESVP-2011-V-A",
   "NE-CESVP-2011-V-B","NE-CESVP-2011-V-C"};
 
-  //srand(time(NULL));
+  srand(time(NULL));
   string path;
   unsigned int seconds = 60 * 10; //10 min
   ofstream file("results_MT_4.txt", fstream::app);
@@ -1155,23 +1159,22 @@ int main()
   int res, bres = numeric_limits<decltype(bres)>::max();
 
   cout<<"entra"<<endl;
-  for(unsigned int i = 0; i < 34; i++)
+  for(unsigned int i = 0; i < 1; i++)
   {
     cout<<names[i]<<endl;
     path = "instances/" + names[i] + ".xml";
     readXML(path);
-
+	//readXML("test.xml");
+	
     cout<<"done reading."<<endl;
-    iteratedLocalSearchTQ(sol, 20);
+    iteratedLocalSearchTQ(sol, seconds);
 
     cout<<"solution generated"<<endl;
-    for(auto & s : sol.schd)
-    {
-      int d = -1;
-      if (s<reqs.end()) d = s - reqs.begin();
-      cout<< d <<" ";
-    }
+	
+	printSolution(sol);
 
+	cout << sol.maleda << " " << sol.cote << " " << sol.avai << endl;
+	cout << sol.midole << " " << sol.idti  << " " << sol.teco << endl;
     cout << sol.total << endl;
     /*if ( res < bres)
     {
