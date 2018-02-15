@@ -385,7 +385,7 @@ void fitness(Solution &sol)
 void generateSolution(Solution & sol)
 {
   vector<unsigned short int> avaiDp;
-  int lectures = 0, cl = -1, last_cl = cl, total_lec = 0;
+  int lectures = 0, total_lec = 0;
   int random_ts;
   //cout<<num_q<<" "<<num_ts<<endl;
   sol.UpdateSize();
@@ -421,11 +421,12 @@ void generateSolution(Solution & sol)
 inline void TQMove(Solution & sol, unsigned int ti, unsigned int tj)
 {
   comp_graph.assign(nclss*nclss, 0);
+  comp_visited.assign(nclss, 0);
   for ( auto iti = sol.schd.begin() + ti, itj = sol.schd.begin() + tj; iti < sol.schd.end(); iti+=ndps, itj+=ndps )
   {
     if ( *iti != *itj )
     {
-      if ( *itj == reqs.end() ) // *iti exists
+      if ( *iti != reqs.end() ) // *iti exists
       {
         unsigned int tchr = unsigned ( *iti - reqs.begin() ) % ntchs;
         unsigned int clss = ( unsigned ( iti - sol.schd.begin() ) / ndps );
@@ -435,7 +436,7 @@ inline void TQMove(Solution & sol, unsigned int ti, unsigned int tj)
               comp_graph[ clss * nclss + unsigned ( jtj - sol.schd.begin() ) / ndps ] =
               comp_graph[ ( unsigned ( jtj - sol.schd.begin() ) / ndps ) * nclss + clss ] = 1;
       }
-      if ( *iti == reqs.end() ) // *itj exists
+      if ( *itj != reqs.end() ) // *itj exists
       {
         unsigned int tchr = unsigned ( *itj - reqs.begin() ) % ntchs;
         unsigned int clss = unsigned ( itj - sol.schd.begin() ) / ndps;
@@ -489,8 +490,7 @@ void perturbation(Solution & sol)
 
 void localSearchTQ(Solution & bsol)
 {
-  Solution csol = bsol;
-  comp_visited.assign(nclss, 0);
+  Solution csol = bsol, ccsol = bsol;
   unsigned int oldbest;
   do
   {
@@ -500,15 +500,17 @@ void localSearchTQ(Solution & bsol)
       for(unsigned int j = 0; j < ndps; j++)
       {
         if(i == j) continue;
-        TQMove(csol, i, j);
+		TQMove(csol, i, j);
 
         for(unsigned int k = 0; k < nclss; k++)
         {
           if (comp_visited[k]) continue;
+			//cout<<"DFS to be done."<<endl;
           DFS(k); // get components with a depth first search from a class as root
           applySwap(csol, i, j);
           fitness(csol);
           if(csol.total <= bsol.total) bsol = csol;
+		  else csol = bsol;
         }
       }
     }
@@ -523,20 +525,27 @@ void iteratedLocalSearchTQ(Solution & bsol, int stop_condition)
   elapsed(true);
   generateSolution(bsol);
   //fitness(bsol);
-  
-  localSearchTQ(bsol);
+  //localSearchTQ(bsol);
   Solution csol = bsol;
-  cout<<endl<< ">> " <<bsol.total<<endl;
+  //cout<<endl<< ">> " <<bsol.total<<endl;
 
   while ( elapsed() < stop_condition )
   {
     //cout<<i<<endl;
-    //cout<<"ini perturbation"<<endl;
+    
+	//printSolution(csol);
+	//cout<<"ini perturbation"<<endl;
+	cout << bsol.total << " " << csol.total << endl;
     perturbation(csol);
-    //cout<<"perturbed"<<endl;
+    
+	//cout<<"perturbed"<<endl;
+	//printSolution(csol);
+	//break;
+	
     fitness(csol);
     localSearchTQ(csol);
 
+	//return;
     if ( bsol.total > csol.total )
       not_improved = 0;
     else
@@ -1182,7 +1191,7 @@ int main()
     bsol = sol;
   }*/
 
-}
+  }
 
 file.close();
 return 0;
