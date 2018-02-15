@@ -490,7 +490,7 @@ void perturbation(Solution & sol)
 
 void localSearchTQ(Solution & bsol)
 {
-  Solution csol = bsol, ccsol = bsol;
+  Solution csol = bsol;
   unsigned int oldbest;
   do
   {
@@ -535,7 +535,7 @@ void iteratedLocalSearchTQ(Solution & bsol, int stop_condition)
     
 	//printSolution(csol);
 	//cout<<"ini perturbation"<<endl;
-	cout << bsol.total << " " << csol.total << endl;
+	//cout << bsol.total << " " << csol.total << endl;
     perturbation(csol);
     
 	//cout<<"perturbed"<<endl;
@@ -1140,35 +1140,33 @@ int main()
   b.aa[0] = 40;
   cout<<*(c.a)<<" "<<c.aa[0]<<endl;*/
 
-  string names[34] = {"CL-CEASD-2008-V-A", "CL-CEASD-2008-V-B",
-  "CL-CECL-2011-M-A", "CL-CECL-2011-M-B",
-  "CL-CECL-2011-N-A", "CL-CECL-2011-V-A",
-  "CM-CECM-2011-M", "CM-CECM-2011-N",
-  "CM-CECM-2011-V", "CM-CEDB-2010-N",
-  "CM-CEUP-2008-V", "CM-CEUP-2011-M",
-  "CM-CEUP-2011-N", "CM-CEUP-2011-V",
-  "FA-EEF-2011-M", "JNS-CEDPII-2011-M",
-  "JNS-CEDPII-2011-V", "JNS-CEJXXIII-2011-M",
-  "JNS-CEJXXIII-2011-N", "JNS-CEJXXIII-2011-V",
-  "MGA-CEDC-2011-M", "MGA-CEDC-2011-V",
-  "MGA-CEGV-2011-M", "MGA-CEGV-2011-V",
-  "MGA-CEJXXIII-2010-V", "MGA-CEVB-2011-M",
-  "MGA-CEVB-2011-V", "NE-CESVP-2011-M-A",
-  "NE-CESVP-2011-M-B","NE-CESVP-2011-M-C",
-  "NE-CESVP-2011-M-D","NE-CESVP-2011-V-A",
-  "NE-CESVP-2011-V-B","NE-CESVP-2011-V-C"};
+  string names[34] = {"CM-CEUP-2011-N", "FA-EEF-2011-M", 
+ "JNS-CEJXXIII-2011-N", "CM-CEDB-2010-N", "JNS-CEJXXIII-2011-M", "JNS-CEJXXIII-2011-V", "JNS-CEDPII-2011-V",
+	  "CM-CECM-2011-N", "JNS-CEDPII-2011-M", "CL-CECL-2011-N-A", "MGA-CEVB-2011-V", "MGA-CEVB-2011-M",
+  "CL-CEASD-2008-V-A", "CL-CEASD-2008-V-B", "MGA-CEDC-2011-V", "CL-CECL-2011-M-A", "CL-CECL-2011-M-B",
+	  "CM-CECM-2011-V", "CL-CECL-2011-V-A", "CM-CEUP-2008-V", "CM-CEUP-2011-M",
+	  "CM-CEUP-2011-V", "MGA-CEJXXIII-2010-V", "NE-CESVP-2011-V-A",
+	  "NE-CESVP-2011-V-B","NE-CESVP-2011-V-C", "NE-CESVP-2011-M-A",
+	  "NE-CESVP-2011-M-B","NE-CESVP-2011-M-C",
+	  "NE-CESVP-2011-M-D", "MGA-CEDC-2011-M",
+	  "CM-CECM-2011-M", "MGA-CEGV-2011-M", "MGA-CEGV-2011-V"
+   };
+  
+  string num;
 
   srand(time(NULL));
   string path;
-  unsigned int seconds = 60 * 10; //10 min
-  ofstream file("results_MT_4.txt", fstream::app);
+  unsigned int seconds = 60 * 10;//10 min
+  cout<<"Numero del archivo: ";
+  cin>>num;
+  ofstream file("results_TQ_" + num + ".txt", fstream::app);
 
 
   Solution sol, bsol;
   int res, bres = numeric_limits<decltype(bres)>::max();
 
   cout<<"entra"<<endl;
-  for(unsigned int i = 0; i < 1; i++)
+  for(unsigned int i = 0; i < 34; i++)
   {
     cout<<names[i]<<endl;
     path = "instances/" + names[i] + ".xml";
@@ -1178,19 +1176,16 @@ int main()
     cout<<"done reading."<<endl;
     iteratedLocalSearchTQ(sol, seconds);
 
-    cout<<"solution generated"<<endl;
+    /*cout<<"solution generated"<<endl;
 	
 	printSolution(sol);
 
 	cout << sol.maleda << " " << sol.cote << " " << sol.avai << endl;
 	cout << sol.midole << " " << sol.idti  << " " << sol.teco << endl;
-    cout << sol.total << endl;
-    /*if ( res < bres)
-    {
-    bres = res;
-    bsol = sol;
-  }*/
+    cout << sol.total << endl;*/
 
+	file << names[i] << " " << sol.cote << " " << sol.avai << " " << sol.maleda << " ";
+	file << sol.midole << " " << sol.idti << " " << sol.teco << " " << sol.total << '\n';
   }
 
 file.close();
